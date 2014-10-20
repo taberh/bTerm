@@ -10,7 +10,8 @@ npm install bTerm -g
 ```
 # First
 bTerm # default prot 8080
-bTerm -p 8000 # custom port
+bTerm --port 8000 # custom port
+bTerm --ghost 
 
 # Then
 open http://localhost:8080
