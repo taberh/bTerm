@@ -9,16 +9,14 @@ npm install bTerm -g
 
 ```
 # First
-bTerm # default prot 8080
-bTerm --port 8000 # custom port
-bTerm --ghost 
+bTerm # default prot 8888
 
 # Then
-open http://localhost:8080
+open http://localhost:8888
 ```
 
 你还要以在你需要的地方使用 iframe 引用
 
 ```
-<iframe src="http://localhost:8080"></iframe>
+<iframe src="http://locawhost:8888"></iframe>
 ```
