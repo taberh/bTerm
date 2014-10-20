@@ -1,2 +1,62 @@
 #!/usr/bin/env node
 
+var fs       = require('fs')
+var http     = require('http')
+var connect  = require('connect')
+var terminal = require('term.js')
+var static   = require('serve-static')
+var io       = require('socket.io')
+var pty      = require('pty.js')
+
+
+var app, io, term,
+    buff = []
+
+// create http server
+app = connect()
+app.use(terminal.middleware())
+app.use(static(__dirname + '/../'))
+app = http.createServer(app).listen(8888, function() {
+    console.log('Running at http://localhost:8888')
+})
+
+
+// create socket server
+io(app).on('connection', function(socket) {
+    var handshakeData = socket.handshake.query
+
+    // configure terminal
+    term = pty.spawn(process.env.SHELL || '/bin/bash', [], {
+        name: fs.existsSync('/usr/share/terminfo/x/xterm-256color') ? 'xterm-256color' : 'xterm',
+        cols: parseInt(handshakeData.cols, 10) || 80,
+        rows: parseInt(handshakeData.rows, 10) || 24,
+        cwd: process.env.HOME
+    })
+
+    term.on('data', function(data) {
+        return !socket
+            ? buff.push(data)
+            : socket.emit('data', data)
+    })
+
+    term.on('close', function() {
+        socket && socket.disconnect()
+    })
+
+    socket.on('data', function(data) {
+        term.write(data)
+    })
+
+    socket.on('disconnect', function() {
+        socket = null
+        term.end()
+    })
+
+    socket.on('resize', function(data) {
+        term.resize(data[0], data[1])
+    })
+
+    while(buff.length) {
+        socket.emit('data', buff.shift())
+    }
+})
