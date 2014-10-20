@@ -1,7 +1,7 @@
 {
   "name": "bterm",
   "version": "0.0.1",
-  "description": "这是一个运行在浏览器环境的终端程序",
+  "description": "这是一个运行在浏览器环境的终端",
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
