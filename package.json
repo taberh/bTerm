@@ -1,0 +1,33 @@
+{
+  "name": "bTerm",
+  "version": "0.0.1",
+  "description": "这是一个运行在浏览器环境的终端程序",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+      "bTerm": "./bin/bTerm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:taberh/bTerm.git"
+  },
+  "keywords": [
+    "terminal"
+  ],
+  "author": "taberh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taberh/bTerm/issues"
+  },
+  "homepage": "https://github.com/taberh/bTerm",
+  "dependencies": {
+    "pty.js": "^0.2.4",
+    "term.js": "0.0.4",
+    "socket.io": "^1.1.0",
+    "connect": "^3.3.0",
+    "serve-static": "^1.7.0",
+    "serve-index": "^1.5.0"
+  }
+}
