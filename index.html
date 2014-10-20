@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <title>term.js</title>
+<!--
+  term.js
+  Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+-->
+<style>
+  html {
+    background: #000;
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    height: 100%;
+  }
+
+  .terminal {
+    font-family: Menlo, monospace;
+    font-size: 11px;
+    color: #f0f0f0;
+    background: #000;
+  }
+
+  .terminal-cursor {
+    color: #000;
+    background: #f0f0f0;
+  }
+</style>
+  </head>
+
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="term.js"></script>
+    <script>
+    ;(function() {
+      window.onload = function() {
+        var calMaxSize = (function() {
+          var term = document.createElement('div')
+          var cell = document.createElement('div')
+
+          term.className = 'terminal'
+          term.style.position = 'absolute'
+          term.style.top = '-10000px'
+          cell.innerHTML = '&nbsp;'
+          term.appendChild(cell)
+          document.body.appendChild(term)
+
+          return function() {
+            var w = document.body.clientWidth - (term.offsetWidth - term.clientWidth)
+            var h = document.body.clientHeight - (term.offsetHeight - term.clientHeight)
+            var x = cell.offsetWidth
+            var y = cell.offsetHeight
+
+            return {
+              cols: Math.max(Math.floor(w / x), 10),
+              rows: Math.max(Math.floor(h / y), 10)
+            }
+          }
+        })()
+
+        var maxSize = calMaxSize()
+        var socket = io.connect('', {
+          query: {
+            cols: maxSize.cols,
+            rows: maxSize.rows
+          }
+        });
+        socket.on('connect', function() {
+          var term = new Terminal({
+            cols: maxSize.cols,
+            rows: maxSize.rows,
+            useStyle: true,
+            screenKeys: true,
+            cursorBlink: false
+          });
+
+          term.on('data', function(data) {
+            socket.emit('data', data);
+          });
+
+          term.on('title', function(title) {
+            document.title = title;
+          });
+
+          term.open(document.body);
+
+          term.write('\x1b[31mWelcome to bTerm!\x1b[m\r\n');
+
+          socket.on('data', function(data) {
+            term.write(data);
+          });
+
+          socket.on('disconnect', function() {
+            term.destroy();
+          });
+
+          window.onresize = function() {
+            var maxSize = calMaxSize()
+            term.resize(maxSize.cols, maxSize.rows)
+            socket.emit('resize', [maxSize.cols, maxSize.rows])
+          }
+        });
+      };
+    }).call(this);
+    </script>
+  </body>
+</html>
