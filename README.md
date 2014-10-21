@@ -2,7 +2,7 @@
 ## Installtion
 
 ```
-npm install bTerm -g
+npm install bterm -g
 ```
 
 ## Usage
