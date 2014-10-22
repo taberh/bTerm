@@ -1,5 +1,47 @@
 #!/usr/bin/env node
 
+var SLICE_SYMBOL = '-'
+var argv = process.argv.slice(1)
+var options = [
+        {},
+        {
+            key: 'port',
+            alias: 'p',
+            default: 8888
+        }
+    ]
+
+if (argv.length > 1) {
+    argv = argv.reduce(function(p, c, i, a) {
+        p = typeof p === 'string' ? {} : p
+
+        if (c.indexOf(SLICE_SYMBOL) > -1) {
+            c = c.replace(SLICE_SYMBOL, '')
+            c = c.replace(SLICE_SYMBOL, '')
+            p[c] = undefined
+        }
+
+        if (p.hasOwnProperty(c) && 
+            a[++i] && 
+            a[i].indexOf(SLICE_SYMBOL) === -1) {
+                p[c] = a[i]
+        }
+
+        return p
+    })
+}
+
+options = options.reduce(function(p, c, i, a) {
+    c.value = argv[c.key] || argv[c.alias] || c.default
+    p[c.key] = c
+    return p
+})
+
+if (Number.isNaN(parseInt(options.port.value, 10))) {
+    console.log('port invalid')
+    process.exit(0)
+}
+
 var fs       = require('fs')
 var http     = require('http')
 var connect  = require('connect')
@@ -16,8 +58,8 @@ var app, io, term,
 app = connect()
 app.use(terminal.middleware())
 app.use(static(__dirname + '/../'))
-app = http.createServer(app).listen(8888, function() {
-    console.log('Running at http://localhost:8888')
+app = http.createServer(app).listen(options.port.value, function() {
+    console.log('Running at http://localhost:' + options.port.value)
 })
 
 
