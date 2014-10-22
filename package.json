@@ -14,7 +14,12 @@
     "url": "git@github.com:taberh/bTerm.git"
   },
   "keywords": [
-    "terminal"
+    "terminal",
+    "browser terminal",
+    "web terminal",
+    "pty.js",
+    "term.js",
+    "term"
   ],
   "author": "taberh",
   "license": "MIT",
