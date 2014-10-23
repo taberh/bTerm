@@ -8,6 +8,11 @@ var options = [
             key: 'port',
             alias: 'p',
             default: 8888
+        },
+        {
+            key: 'open',
+            alias: 'o',
+            default: false
         }
     ]
 
@@ -32,7 +37,13 @@ if (argv.length > 1) {
 }
 
 options = options.reduce(function(p, c, i, a) {
-    c.value = argv[c.key] || argv[c.alias] || c.default
+    if (typeof c.default === 'boolean') {
+        c.value = (argv.hasOwnProperty(c.key) || argv.hasOwnProperty(c.alias)) ? !c.default : c.default
+    }
+    else {
+        c.value = argv[c.key] || argv[c.alias] || c.default
+    }
+
     p[c.key] = c
     return p
 })
@@ -49,6 +60,8 @@ var terminal = require('term.js')
 var static   = require('serve-static')
 var io       = require('socket.io')
 var pty      = require('pty.js')
+var exec     = require('child_process').exec
+var spawn    = require('child_process').spawn
 
 
 var app, io, term,
@@ -59,7 +72,9 @@ app = connect()
 app.use(terminal.middleware())
 app.use(static(__dirname + '/../'))
 app = http.createServer(app).listen(options.port.value, function() {
-    console.log('Running at http://localhost:' + options.port.value)
+    var url = 'http://localhost:' + options.port.value
+    console.log('Running at ' + url)
+    options.open.value && openURL(url)
 })
 
 
@@ -102,3 +117,26 @@ io(app).on('connection', function(socket) {
         socket.emit('data', buff.shift())
     }
 })
+
+
+/**
+ * https://github.com/JacksonTian/anywhere/blob/master/bin/anywhere
+ */
+function openURL(url) {
+    switch (process.platform) {
+        case "darwin":
+            exec('open ' + url);
+            break;
+        case "win32":
+            exec('start ' + url);
+            break;
+        default:
+            spawn('xdg-open', [url]);
+            // I use `spawn` since `exec` fails on my machine (Linux i386).
+            // I heard that `exec` has memory limitation of buffer size of 512k.
+            // http://stackoverflow.com/a/16099450/222893
+            // But I am not sure if this memory limit causes the failure of `exec`.
+            // `xdg-open` is specified in freedesktop standard, so it should work on
+            // Linux, *BSD, solaris, etc.
+    }
+}
